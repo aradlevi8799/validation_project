@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ספריית Validation — הסבר מלא</title>
+  <style>
+    /* ── Reset & base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0f1117;
+      --surface:   #1a1d27;
+      --surface2:  #222638;
+      --border:    #2e3350;
+      --accent:    #7c6ff7;
+      --accent2:   #56cfb2;
+      --accent3:   #f7a24b;
+      --red:       #e05c6a;
+      --green:     #4ec994;
+      --blue:      #4da6ff;
+      --text:      #e2e4f0;
+      --muted:     #7b80a0;
+      --code-bg:   #141720;
+      --radius:    12px;
+      --radius-sm: 6px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', 'Arial Hebrew', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.75;
+    }
+
+    /* ── Layout ── */
+    .page-wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, #1a1d40 0%, #0f1117 60%);
+      border-bottom: 1px solid var(--border);
+      padding: 64px 24px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(124,111,247,.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(124,111,247,.15);
+      border: 1px solid rgba(124,111,247,.4);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 4px 16px;
+      font-size: 13px;
+      letter-spacing: .5px;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 800;
+      background: linear-gradient(120deg, #fff 30%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+    .hero p {
+      color: var(--muted);
+      font-size: 18px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* ── TOC ── */
+    .toc {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin: 40px 0;
+    }
+    .toc h2 { font-size: 15px; color: var(--muted); margin-bottom: 16px; letter-spacing: .8px; }
+    .toc ol { padding-right: 20px; }
+    .toc li { margin: 6px 0; }
+    .toc a { color: var(--accent); text-decoration: none; font-size: 15px; }
+    .toc a:hover { text-decoration: underline; }
+
+    /* ── Sections ── */
+    section { margin-top: 64px; }
+    section:first-of-type { margin-top: 48px; }
+
+    h2.section-title {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    h3 { font-size: 20px; font-weight: 600; margin: 32px 0 12px; color: var(--accent2); }
+    h4 { font-size: 16px; font-weight: 600; margin: 20px 0 8px; color: var(--accent3); }
+
+    p { margin-bottom: 14px; }
+    ul, ol { padding-right: 24px; margin-bottom: 14px; }
+    li { margin: 6px 0; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin: 20px 0;
+    }
+    .card-accent { border-right: 4px solid var(--accent); }
+    .card-green  { border-right: 4px solid var(--green); }
+    .card-orange { border-right: 4px solid var(--accent3); }
+    .card-blue   { border-right: 4px solid var(--blue); }
+    .card-red    { border-right: 4px solid var(--red); }
+
+    /* ── Pattern header cards ── */
+    .pattern-hero {
+      border-radius: var(--radius);
+      padding: 28px 28px 20px;
+      margin-bottom: 24px;
+    }
+    .pattern-hero.combinator { background: linear-gradient(135deg, rgba(124,111,247,.15), rgba(124,111,247,.04)); border: 1px solid rgba(124,111,247,.3); }
+    .pattern-hero.factory    { background: linear-gradient(135deg, rgba(78,201,148,.15), rgba(78,201,148,.04)); border: 1px solid rgba(78,201,148,.3); }
+    .pattern-hero.template   { background: linear-gradient(135deg, rgba(247,162,75,.15), rgba(247,162,75,.04)); border: 1px solid rgba(247,162,75,.3); }
+
+    .pattern-hero .tag {
+      display: inline-block;
+      padding: 3px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      letter-spacing: .5px;
+    }
+    .combinator .tag { background: rgba(124,111,247,.25); color: #a89ef9; }
+    .factory    .tag { background: rgba(78,201,148,.25);  color: #4ec994; }
+    .template   .tag { background: rgba(247,162,75,.25);  color: #f7a24b; }
+
+    .pattern-hero h3 { margin: 0 0 8px; font-size: 22px; color: #fff; }
+    .pattern-hero .points {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .pattern-hero .points strong { color: var(--red); font-size: 15px; }
+
+    /* ── Code blocks ── */
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      overflow-x: auto;
+      margin: 16px 0;
+      direction: ltr;
+      text-align: left;
+    }
+    code {
+      font-family: 'Consolas', 'JetBrains Mono', 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    p code, li code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 13px;
+      color: #c5b9ff;
+    }
+
+    /* Syntax coloring */
+    .kw  { color: #c792ea; }   /* keyword */
+    .tp  { color: #82aaff; }   /* type */
+    .st  { color: #c3e88d; }   /* string */
+    .cm  { color: #546e7a; font-style: italic; } /* comment */
+    .fn  { color: #82aaff; }   /* function */
+    .nm  { color: #f78c6c; }   /* number */
+    .an  { color: #ffcb6b; }   /* annotation */
+
+    /* ── Diagram ── */
+    .diagram {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 24px;
+      overflow-x: auto;
+      direction: ltr;
+      text-align: left;
+      margin: 20px 0;
+    }
+    .diagram pre { background: none; border: none; padding: 0; margin: 0; }
+
+    /* ── Comparison table ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 15px;
+    }
+    th {
+      background: var(--surface2);
+      padding: 12px 16px;
+      text-align: right;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      color: var(--accent);
+    }
+    td {
+      padding: 11px 16px;
+      border: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+
+    /* ── Rejects table ── */
+    .reject-table th { color: var(--red); }
+    .reject-table .score { color: var(--red); font-weight: 700; }
+    .reject-table .pass  { color: var(--green); }
+
+    /* ── File tree ── */
+    .file-tree {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      direction: ltr;
+      text-align: left;
+      font-family: 'Consolas', monospace;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+    .file-tree .dir  { color: #82aaff; }
+    .file-tree .file { color: #c3e88d; }
+    .file-tree .note { color: #546e7a; }
+
+    /* ── Callout ── */
+    .callout {
+      display: flex;
+      gap: 14px;
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      padding: 16px 20px;
+      margin: 20px 0;
+      align-items: flex-start;
+      border: 1px solid var(--border);
+    }
+    .callout .icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+    .callout.warn  { border-right: 4px solid var(--accent3); }
+    .callout.info  { border-right: 4px solid var(--blue); }
+    .callout.ok    { border-right: 4px solid var(--green); }
+
+    /* ── Test results ── */
+    .test-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .test-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+    }
+    .test-card .label { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+    .test-card .score { font-size: 22px; font-weight: 700; color: var(--green); }
+    .test-card .desc  { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+    /* ── Steps ── */
+    .steps { counter-reset: step; display: flex; flex-direction: column; gap: 16px; margin: 20px 0; }
+    .step  {
+      display: flex; gap: 16px; align-items: flex-start;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 16px 20px;
+    }
+    .step::before {
+      counter-increment: step;
+      content: counter(step);
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 28px; height: 28px;
+      border-radius: 50%; background: var(--accent);
+      color: #fff; font-weight: 700; font-size: 14px; flex-shrink: 0;
+    }
+    .step strong { display: block; margin-bottom: 4px; }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 80px;
+      padding: 32px 24px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; color: #000; }
+      .hero { background: #f5f5f5; border-bottom: 2px solid #ccc; }
+      pre, .diagram, .file-tree { background: #f9f9f9; border: 1px solid #ccc; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════ HERO ═══════════════════════════════════ -->
+<div class="hero">
+  <div class="hero-badge">קורס תבניות עיצוב תוכנה קלאסיות</div>
+  <h1>ספריית Validation ב-Java<br/>הסבר מלא מאפס</h1>
+  <p>מדריך מקיף למי שלא היה בקורס ולא מכיר את הנושא — מה נדרש, מה בנינו, ואיך הכל עובד</p>
+</div>
+
+<div class="page-wrap">
+
+  <!-- ═══════════════════════════ TOC ═══════════════════════════ -->
+  <nav class="toc">
+    <h2>תוכן העניינים</h2>
+    <ol>
+      <li><a href="#s1">מה המטרה של המטלה?</a></li>
+      <li><a href="#s2">מה זה תבנית עיצוב?</a></li>
+      <li><a href="#s3">תבנית Combinator — לב הפרויקט</a></li>
+      <li><a href="#s4">תבנית Factory Method</a></li>
+      <li><a href="#s5">תבנית Template Method</a></li>
+      <li><a href="#s6">המחלקות והממשקים — מה בנינו</a></li>
+      <li><a href="#s7">מבנה הפרויקט</a></li>
+      <li><a href="#s8">איך הכל עובד יחד — תהליך מלא</a></li>
+      <li><a href="#s9">תוצאות הבדיקות</a></li>
+      <li><a href="#s10">נקודות הניכוי שהימנענו מהן</a></li>
+    </ol>
+  </nav>
+
+  <!-- ═══════════════════════════ 1 ═══════════════════════════ -->
+  <section id="s1">
+    <h2 class="section-title"><span class="section-num">1</span>מה המטרה של המטלה?</h2>
+
+    <p>
+      דמיינו שאתם בונים אתר שבו משתמשים חדשים נרשמים. בזמן ההרשמה אתם רוצים לוודא
+      שהאימייל שהוזן נראה תקין, שהסיסמה חזקה מספיק, שהמשתמש מעל גיל 18 וכן הלאה.
+    </p>
+    <p>
+      המטלה מבקשת לבנות <strong>ספריית Java</strong> בשם <code>validation.jar</code>
+      שתבצע בדיוק את זה — בצורה גנרית, גמישה, וניתנת לשימוש חוזר על ידי כל מפתח.
+    </p>
+
+    <div class="card card-accent">
+      <h4>מה ספריית validation מאפשרת לעשות?</h4>
+      <p>המפתח שמשתמש בספרייה יכול לכתוב קוד כזה:</p>
+<pre><code><span class="tp">UserValidation</span> rule = <span class="tp">UserValidation</span>.<span class="fn">emailEndsWithIL</span>()
+                                   .<span class="fn">and</span>(<span class="tp">UserValidation</span>.<span class="fn">passwordLengthBiggerThan8</span>())
+                                   .<span class="fn">and</span>(<span class="tp">UserValidation</span>.<span class="fn">ageBiggerThan18</span>());
+
+<span class="tp">ValidationResult</span> result = rule.<span class="fn">apply</span>(user);
+
+<span class="kw">if</span> (result.<span class="fn">isValid</span>()) {
+    System.out.<span class="fn">println</span>(<span class="st">"המשתמש עבר את כל הבדיקות"</span>);
+} <span class="kw">else</span> {
+    System.out.<span class="fn">println</span>(<span class="st">"בעיה: "</span> + result.<span class="fn">getReason</span>().<span class="fn">get</span>());
+}</code></pre>
+    </div>
+
+    <h3>שלושת הדברים שנדרשו לממש</h3>
+    <table>
+      <tr>
+        <th>מה</th>
+        <th>כיצד</th>
+        <th>ניקוד בסיכון</th>
+      </tr>
+      <tr>
+        <td><strong>Combinator Pattern</strong></td>
+        <td>ממשק <code>UserValidation</code> עם <code>and / or / xor / all / none</code></td>
+        <td style="color:var(--red)">40 נקודות</td>
+      </tr>
+      <tr>
+        <td><strong>Factory Method Pattern</strong></td>
+        <td>מחלקת <code>UserFactory</code> שיוצרת משתמשים לפי סוג</td>
+        <td style="color:var(--red)">10 נקודות</td>
+      </tr>
+      <tr>
+        <td><strong>Template Method Pattern</strong></td>
+        <td>מתודת <code>UserUtils.sort</code> עם <code>Comparator</code></td>
+        <td style="color:var(--red)">10 נקודות</td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- ═══════════════════════════ 2 ═══════════════════════════ -->
+  <section id="s2">
+    <h2 class="section-title"><span class="section-num">2</span>מה זה תבנית עיצוב?</h2>
+
+    <p>
+      <strong>תבנית עיצוב (Design Pattern)</strong> היא פתרון כללי ומוכח לבעיה שחוזרת שוב ושוב בתכנות.
+      זה לא קוד שמעתיקים — זה <em>רעיון</em> על איך לארגן קוד.
+    </p>
+    <p>
+      אפשר לחשוב על זה כמו מתכון בבישול: אם אתם יודעים להכין "רוטב בסיס", תוכלו להשתמש
+      בו בהרבה מנות שונות. כך גם תבניות עיצוב — הן מתכונים לפתרון בעיות נפוצות בתכנות.
+    </p>
+
+    <div class="callout info">
+      <div class="icon">💡</div>
+      <div>
+        <strong>מאיפה זה בא?</strong><br/>
+        הספר המפורסם ביותר בנושא הוא "Design Patterns: Elements of Reusable Object-Oriented Software"
+        מ-1994, שנכתב על ידי ארבעה מחברים המכונים "Gang of Four". הספר מתאר 23 תבניות עיצוב קלאסיות.
+        שלוש מהן נמצאות בפרויקט שלנו.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════ 3 ═══════════════════════════ -->
+  <section id="s3">
+    <h2 class="section-title"><span class="section-num">3</span>תבנית Combinator — לב הפרויקט</h2>
+
+    <div class="pattern-hero combinator">
+      <span class="tag">COMBINATOR PATTERN</span>
+      <h3>משלב — בונים מהקטן לגדול</h3>
+      <p>כותבים כללים קטנים ופשוטים, ואז מחברים אותם לכלל גדול ומורכב.</p>
+      <p class="points">ניקוד בסיכון: <strong>40 נקודות</strong></p>
+    </div>
+
+    <h3>הבעיה שהתבנית פותרת</h3>
+    <p>
+      נניח שיש לנו 8 כללי בדיקה שונים. איך נבדוק שמשתמש עובר כמה מהם?
+      הדרך הנאיבית היא לכתוב <code>if</code> מקוננים:
+    </p>
+
+<pre><code><span class="cm">// ✗ גישה בעייתית — קשה לתחזוקה, לא גמיש</span>
+<span class="kw">if</span> (user.<span class="fn">getEmail</span>().<span class="fn">endsWith</span>(<span class="st">"il"</span>)) {
+    <span class="kw">if</span> (user.<span class="fn">getPassword</span>().<span class="fn">length</span>() > <span class="nm">8</span>) {
+        <span class="kw">if</span> (user.<span class="fn">getAge</span>() > <span class="nm">18</span>) {
+            <span class="cm">// ...ועוד if...</span>
+        }
+    }
+}</code></pre>
+
+    <p>
+      הבעיה: כל פעם שרוצים שילוב אחר של כללים, צריך לכתוב קוד חדש.
+      אי אפשר לשמור כלל ב-<code>variable</code> ולהעביר אותו לפונקציות.
+    </p>
+
+    <h3>הגישה של Combinator</h3>
+    <p>
+      כל כלל בדיקה הוא <strong>אובייקט עצמאי</strong> — פונקציה שמקבלת משתמש ומחזירה תוצאה.
+      אפשר לאחסן כלל ב-variable, להעביר אותו לפונקציות, ולשלב עם כללים אחרים:
+    </p>
+
+<pre><code><span class="cm">// ✓ גישת Combinator — נקי וגמיש לחלוטין</span>
+
+<span class="cm">// שמירת כלל ב-variable</span>
+<span class="tp">UserValidation</span> emailRule = <span class="tp">UserValidation</span>.<span class="fn">emailEndsWithIL</span>();
+
+<span class="cm">// שילוב כמה כללים עם and</span>
+<span class="tp">UserValidation</span> combined = <span class="tp">UserValidation</span>.<span class="fn">emailEndsWithIL</span>()
+    .<span class="fn">and</span>(<span class="tp">UserValidation</span>.<span class="fn">passwordLengthBiggerThan8</span>())
+    .<span class="fn">and</span>(<span class="tp">UserValidation</span>.<span class="fn">ageBiggerThan18</span>());
+
+<span class="cm">// שימוש</span>
+<span class="tp">ValidationResult</span> result = combined.<span class="fn">apply</span>(user);</code></pre>
+
+    <h3>מה זה אומר "extends Function"?</h3>
+    <p>
+      בג'אווה יש ממשק מובנה בשם <code>Function&lt;A, B&gt;</code> שמייצג פונקציה שמקבלת <code>A</code>
+      ומחזירה <code>B</code>. הממשק שלנו מרחיב אותו:
+    </p>
+
+<pre><code><span class="an">@FunctionalInterface</span>
+<span class="kw">public interface</span> <span class="tp">UserValidation</span> <span class="kw">extends</span> <span class="tp">Function</span>&lt;<span class="tp">User</span>, <span class="tp">ValidationResult</span>&gt; {
+    <span class="cm">// כלומר: UserValidation היא פונקציה  User → ValidationResult</span>
+}</code></pre>
+
+    <p>
+      המשמעות: כל <code>UserValidation</code> ניתנת לשימוש בכל מקום שמצפה ל-<code>Function</code>.
+      אפשר גם להגדיר אחת בתור lambda — ביטוי פונקציונלי קצר:
+    </p>
+
+<pre><code><span class="tp">UserValidation</span> myRule = user -> user.<span class="fn">getAge</span>() > <span class="nm">18</span>
+    ? <span class="kw">new</span> <span class="tp">Valid</span>()
+    : <span class="kw">new</span> <span class="tp">Invalid</span>(<span class="st">"גיל מינימלי 18"</span>);</code></pre>
+
+    <h3>כל מתודות השילוב (Combinators)</h3>
+
+    <table>
+      <tr>
+        <th>מתודה</th>
+        <th>סוג</th>
+        <th>מה היא עושה</th>
+        <th>דוגמה</th>
+      </tr>
+      <tr>
+        <td><code>.and(other)</code></td>
+        <td>instance</td>
+        <td>שני הכללים חייבים לעבור (AND לוגי). Short-circuit — אם הראשון נכשל, השני לא נבדק</td>
+        <td><code>A.and(B)</code></td>
+      </tr>
+      <tr>
+        <td><code>.or(other)</code></td>
+        <td>instance</td>
+        <td>מספיק שאחד יעבור (OR לוגי). Short-circuit — אם הראשון עובר, השני לא נבדק</td>
+        <td><code>A.or(B)</code></td>
+      </tr>
+      <tr>
+        <td><code>.xor(other)</code></td>
+        <td>instance</td>
+        <td>בדיוק אחד חייב לעבור (XOR לוגי). שניהם נבדקים תמיד</td>
+        <td><code>A.xor(B)</code></td>
+      </tr>
+      <tr>
+        <td><code>all(v1, v2, ...)</code></td>
+        <td>static</td>
+        <td>כל הכללים שהועברו חייבים לעבור. Varargs — מספר בלתי מוגבל של כללים</td>
+        <td><code>all(A,B,C,D)</code></td>
+      </tr>
+      <tr>
+        <td><code>none(v1, v2, ...)</code></td>
+        <td>static</td>
+        <td>אף כלל לא יעבור. Varargs — מספר בלתי מוגבל של כללים</td>
+        <td><code>none(A,B,C)</code></td>
+      </tr>
+    </table>
+
+    <h3>טבלת אמת — AND / OR / XOR</h3>
+    <table>
+      <tr>
+        <th>כלל A</th><th>כלל B</th><th>A.and(B)</th><th>A.or(B)</th><th>A.xor(B)</th>
+      </tr>
+      <tr><td>✅ עובר</td><td>✅ עובר</td><td>✅</td><td>✅</td><td>❌</td></tr>
+      <tr><td>✅ עובר</td><td>❌ נכשל</td><td>❌</td><td>✅</td><td>✅</td></tr>
+      <tr><td>❌ נכשל</td><td>✅ עובר</td><td>❌</td><td>✅</td><td>✅</td></tr>
+      <tr><td>❌ נכשל</td><td>❌ נכשל</td><td>❌</td><td>❌</td><td>❌</td></tr>
+    </table>
+
+    <h3>8 הכללים המובנים</h3>
+    <p>כל אחד מהם הוא <strong>static method</strong> ללא פרמטרים שמחזיר <code>UserValidation</code>:</p>
+
+    <table>
+      <tr><th>מתודה</th><th>מה היא בודקת</th></tr>
+      <tr><td><code>emailEndsWithIL()</code></td><td>האימייל מסתיים ב-<code>il</code></td></tr>
+      <tr><td><code>emailLengthBiggerThan10()</code></td><td>אורך האימייל גדול מ-10</td></tr>
+      <tr><td><code>passwordLengthBiggerThan8()</code></td><td>אורך הסיסמה גדול מ-8</td></tr>
+      <tr><td><code>passwordIncludesLettersNumbersOnly()</code></td><td>הסיסמה מכילה רק אותיות וספרות</td></tr>
+      <tr><td><code>passwordIncludesDollarSign()</code></td><td>הסיסמה מכילה את התו <code>$</code></td></tr>
+      <tr><td><code>passwordIsDifferentFromUsername()</code></td><td>הסיסמה שונה משם המשתמש</td></tr>
+      <tr><td><code>ageBiggerThan18()</code></td><td>הגיל גדול מ-18</td></tr>
+      <tr><td><code>usernameLengthBiggerThan8()</code></td><td>אורך שם המשתמש גדול מ-8</td></tr>
+    </table>
+  </section>
+
+  <!-- ═══════════════════════════ 4 ═══════════════════════════ -->
+  <section id="s4">
+    <h2 class="section-title"><span class="section-num">4</span>תבנית Factory Method</h2>
+
+    <div class="pattern-hero factory">
+      <span class="tag">FACTORY METHOD PATTERN</span>
+      <h3>מפעל — בונה אובייקטים בלי שתצטרך לדעת איזה</h3>
+      <p>במקום שהקוד יבנה ישירות סוגים שונים של אובייקטים, הוא מבקש מ"מפעל" שייצר אותם.</p>
+      <p class="points">ניקוד בסיכון: <strong>10 נקודות</strong></p>
+    </div>
+
+    <h3>הבעיה שהתבנית פותרת</h3>
+    <p>
+      יש שלושה סוגי משתמשים: Basic, Premium, Platinum. בלי Factory, בכל מקום בקוד
+      שרוצים ליצור משתמש כותבים:
+    </p>
+
+<pre><code><span class="cm">// ✗ בלי Factory — הקוד קשור ישירות לשמות המחלקות</span>
+<span class="tp">User</span> u1 = <span class="kw">new</span> <span class="tp">BasicUser</span>(...);
+<span class="tp">User</span> u2 = <span class="kw">new</span> <span class="tp">PremiumUser</span>(...);
+
+<span class="cm">// אם מוסיפים DiamondUser, צריך לשנות בכל מקום בקוד</span></code></pre>
+
+    <p>עם Factory, כל היצירה מרוכזת במקום אחד:</p>
+
+<pre><code><span class="cm">// ✓ עם Factory — קוד קורא לא יודע ולא צריך לדעת</span>
+<span class="tp">User</span> u = <span class="tp">UserFactory</span>.<span class="fn">create</span>(<span class="st">"premium"</span>, <span class="st">"john"</span>, <span class="st">"john@test.co.il"</span>, <span class="st">"Pass$1"</span>, <span class="nm">25</span>);</code></pre>
+
+    <h3>המימוש</h3>
+
+<pre><code><span class="kw">public class</span> <span class="tp">UserFactory</span> {
+
+    <span class="kw">public static</span> <span class="tp">User</span> <span class="fn">create</span>(<span class="tp">String</span> type, <span class="tp">String</span> username,
+                               <span class="tp">String</span> email, <span class="tp">String</span> password, <span class="kw">int</span> age) {
+        <span class="cm">// ה-Factory Method — מחליט איזה תת-מחלקה ליצור</span>
+        <span class="kw">switch</span> (type.<span class="fn">toLowerCase</span>()) {
+            <span class="kw">case</span> <span class="st">"basic"</span>:    <span class="kw">return new</span> <span class="tp">BasicUser</span>(username, email, password, age);
+            <span class="kw">case</span> <span class="st">"premium"</span>:  <span class="kw">return new</span> <span class="tp">PremiumUser</span>(username, email, password, age);
+            <span class="kw">case</span> <span class="st">"platinum"</span>: <span class="kw">return new</span> <span class="tp">PlatinumUser</span>(username, email, password, age);
+            <span class="kw">default</span>: <span class="kw">throw new</span> <span class="tp">IllegalArgumentException</span>(<span class="st">"Unknown type: "</span> + type);
+        }
+    }
+}</code></pre>
+
+    <h3>היררכיית הירושה</h3>
+    <div class="diagram">
+<pre>
+         User  (מחלקת בסיס)
+        /     \       \
+  BasicUser  PremiumUser  PlatinumUser
+
+  כולן יורשות: username, email, password, age, getters, setters
+</pre>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════ 5 ═══════════════════════════ -->
+  <section id="s5">
+    <h2 class="section-title"><span class="section-num">5</span>תבנית Template Method</h2>
+
+    <div class="pattern-hero template">
+      <span class="tag">TEMPLATE METHOD PATTERN</span>
+      <h3>תבנית — שלד קבוע, פרט אחד מתחלף</h3>
+      <p>מגדירים שלד אלגוריתם שחלק ממנו "פתוח" — הקורא ממלא את החלק המתחלף.</p>
+      <p class="points">ניקוד בסיכון: <strong>10 נקודות</strong></p>
+    </div>
+
+    <h3>הבעיה שהתבנית פותרת</h3>
+    <p>
+      רוצים למיין מערך של משתמשים. אלגוריתם המיון (bubble sort) תמיד אותו דבר —
+      אבל <em>הקריטריון</em> לפיו ממיינים משתנה: פעם לפי גיל, פעם לפי שם, פעם לפי אימייל.
+    </p>
+    <p>
+      בלי Template Method היינו צריכים לכתוב <code>sortByAge</code>, <code>sortByName</code>,
+      <code>sortByEmail</code> — קוד כפול עם לוגיקת מיון זהה.
+    </p>
+
+    <h3>המימוש</h3>
+
+<pre><code><span class="kw">public static void</span> <span class="fn">sort</span>(<span class="tp">User</span>[] users, <span class="tp">Comparator</span>&lt;<span class="tp">User</span>&gt; comparator) {
+    <span class="kw">int</span> n = users.length;
+
+    <span class="cm">// שלד האלגוריתם (bubble sort) — קבוע, לא משתנה</span>
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; n - <span class="nm">1</span>; i++) {
+        <span class="kw">for</span> (<span class="kw">int</span> j = <span class="nm">0</span>; j &lt; n - i - <span class="nm">1</span>; j++) {
+
+            <span class="cm">// ← זה ה"וו" (hook): הצעד המתחלף — מי גדול ממי?</span>
+            <span class="kw">if</span> (comparator.<span class="fn">compare</span>(users[j], users[j + <span class="nm">1</span>]) > <span class="nm">0</span>) {
+                <span class="tp">User</span> temp  = users[j];
+                users[j]   = users[j + <span class="nm">1</span>];
+                users[j + <span class="nm">1</span>] = temp;
+            }
+        }
+    }
+}</code></pre>
+
+    <div class="card card-orange">
+      <h4>כך משתמשים בו</h4>
+<pre><code><span class="cm">// אותה מתודה, שלושה כיוונים שונים:</span>
+
+<span class="cm">// מיון לפי גיל עולה</span>
+<span class="tp">UserUtils</span>.<span class="fn">sort</span>(users, (a, b) -> <span class="tp">Integer</span>.<span class="fn">compare</span>(a.<span class="fn">getAge</span>(), b.<span class="fn">getAge</span>()));
+
+<span class="cm">// מיון לפי שם משתמש אלפביתי</span>
+<span class="tp">UserUtils</span>.<span class="fn">sort</span>(users, (a, b) -> a.<span class="fn">getUsername</span>().<span class="fn">compareTo</span>(b.<span class="fn">getUsername</span>()));
+
+<span class="cm">// מיון לפי גיל יורד</span>
+<span class="tp">UserUtils</span>.<span class="fn">sort</span>(users, (a, b) -> <span class="tp">Integer</span>.<span class="fn">compare</span>(b.<span class="fn">getAge</span>(), a.<span class="fn">getAge</span>()));</code></pre>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════ 6 ═══════════════════════════ -->
+  <section id="s6">
+    <h2 class="section-title"><span class="section-num">6</span>המחלקות והממשקים — מה בנינו</h2>
+
+    <h3>User — מחלקת הבסיס</h3>
+    <div class="card card-blue">
+      <p>מייצגת משתמש עם 4 שדות. הקונסטרקטור קורא ל-<strong>setters</strong> (לא מציב ישירות לשדות):</p>
+<pre><code><span class="kw">public</span> <span class="fn">User</span>(<span class="tp">String</span> username, <span class="tp">String</span> email, <span class="tp">String</span> password, <span class="kw">int</span> age) {
+    <span class="cm">// דרך setters — לא this.username = username</span>
+    <span class="fn">setUsername</span>(username);
+    <span class="fn">setEmail</span>(email);
+    <span class="fn">setPassword</span>(password);
+    <span class="fn">setAge</span>(age);
+}</code></pre>
+    </div>
+
+    <h3>ValidationResult — ממשק התוצאה</h3>
+    <p>
+      כל בדיקת ולידציה מחזירה אובייקט מסוג זה. שני מימושים קונקרטיים:
+    </p>
+    <table>
+      <tr><th></th><th><code>Valid</code></th><th><code>Invalid</code></th></tr>
+      <tr>
+        <td><code>isValid()</code></td>
+        <td>מחזיר <code>true</code> תמיד</td>
+        <td>מחזיר <code>false</code> תמיד</td>
+      </tr>
+      <tr>
+        <td><code>getReason()</code></td>
+        <td><code>Optional.empty()</code> — אין סיבה לכישלון</td>
+        <td><code>Optional.of("סיבה")</code> — מכיל הסבר</td>
+      </tr>
+    </table>
+
+    <div class="callout info">
+      <div class="icon">📌</div>
+      <div>
+        <strong>למה <code>Optional&lt;String&gt;</code> ולא <code>String</code>?</strong><br/>
+        <code>Optional</code> מאפשר לייצג "יש ערך" או "אין ערך" בלי להשתמש ב-<code>null</code>.
+        כאשר הבדיקה עברה בהצלחה — אין סיבת כישלון, ולכן מחזירים <code>Optional.empty()</code>
+        במקום <code>null</code> שעלול לגרום ל-<code>NullPointerException</code>.
+      </div>
+    </div>
+
+    <h3>UserValidation — ממשק הולידציה</h3>
+    <p>
+      זה הממשק המרכזי — <strong>Functional Interface</strong> שמרחיב <code>Function&lt;User, ValidationResult&gt;</code>.
+      המשמעות: ניתן לייצג כלל בדיקה בתור lambda — ביטוי פונקציה קצר.
+    </p>
+
+    <div class="callout ok">
+      <div class="icon">✅</div>
+      <div>
+        <strong>עיקרון חשוב מאוד מה-Rejects:</strong><br/>
+        כשמחזיקים reference לאובייקט, הטיפוס של המשתנה חייב להיות <strong>הממשק</strong>, לא המחלקה הקונקרטית:
+        <br/><br/>
+        <code style="color:var(--red)">Valid result = new Valid();</code> ← שגוי<br/>
+        <code style="color:var(--green)">ValidationResult result = new Valid();</code> ← נכון
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════ 7 ═══════════════════════════ -->
+  <section id="s7">
+    <h2 class="section-title"><span class="section-num">7</span>מבנה הפרויקט</h2>
+
+    <div class="file-tree">
+      <span class="dir">validation_project/</span><br/>
+      &nbsp;&nbsp;<span class="dir">src/</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">il/ac/hit/validation/</span>  <span class="note">← החבילה הנדרשת</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">User.java</span>                <span class="note">← מחלקת בסיס: username, email, password, age</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">BasicUser.java</span>           <span class="note">← extends User (נוצר ע"י Factory)</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">PremiumUser.java</span>         <span class="note">← extends User (נוצר ע"י Factory)</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">PlatinumUser.java</span>        <span class="note">← extends User (נוצר ע"י Factory)</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">UserFactory.java</span>         <span class="note">← Factory Method Pattern</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">UserUtils.java</span>           <span class="note">← Template Method Pattern (sort)</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">ValidationResult.java</span>    <span class="note">← interface: isValid() + getReason()</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Valid.java</span>               <span class="note">← תוצאה חיובית</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Invalid.java</span>             <span class="note">← תוצאה שלילית + סיבה</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">UserValidation.java</span>      <span class="note">← Combinator Pattern — לב הספרייה</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">UserValidationV2Demo.java</span>    <span class="note">← קוד הבדיקה מהמטלה</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">ValidationLibraryTest.java</span>   <span class="note">← 90 בדיקות אוטומטיות</span><br/>
+      &nbsp;&nbsp;<span class="file" style="color:#f7a24b">validation.jar</span>               <span class="note">← הספרייה הסופית לשליחה</span><br/>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════ 8 ═══════════════════════════ -->
+  <section id="s8">
+    <h2 class="section-title"><span class="section-num">8</span>איך הכל עובד יחד — תהליך מלא</h2>
+
+    <p>קוד הבדיקה שסיפקה המטלה:</p>
+
+<pre><code><span class="kw">public class</span> <span class="tp">UserValidationV2Demo</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+
+        <span class="cm">// 1. יוצרים משתמש</span>
+        <span class="tp">User</span> user = <span class="kw">new</span> <span class="tp">User</span>(<span class="st">"admin"</span>, <span class="st">"admin@#yzw.co.il"</span>, <span class="st">"abc123"</span>, <span class="nm">34</span>);
+
+        <span class="cm">// 2. מגדירים שני כללים בנפרד</span>
+        <span class="tp">UserValidation</span> validation1 = <span class="tp">UserValidation</span>.<span class="fn">emailLengthBiggerThan10</span>();
+        <span class="tp">UserValidation</span> validation2 = <span class="tp">UserValidation</span>.<span class="fn">emailEndsWithIL</span>();
+
+        <span class="cm">// 3. משלבים עם and ומפעילים</span>
+        <span class="tp">ValidationResult</span> result = (validation1.<span class="fn">and</span>(validation2)).<span class="fn">apply</span>(user);
+
+        <span class="cm">// 4. בודקים תוצאה</span>
+        <span class="kw">if</span> (result.<span class="fn">isValid</span>()) {
+            System.out.<span class="fn">println</span>(<span class="st">"User is valid"</span>);   <span class="cm">// ← זה מודפס</span>
+        } <span class="kw">else</span> {
+            System.out.<span class="fn">println</span>(<span class="st">"User is not valid"</span>);
+        }
+    }
+}</code></pre>
+
+    <h3>מה קורה בפנים שלב אחר שלב</h3>
+    <div class="steps">
+      <div class="step">
+        <div>
+          <strong>יצירת המשתמש</strong>
+          <code>new User("admin", "admin@#yzw.co.il", "abc123", 34)</code>
+          קורא לקונסטרקטור שמפנה ל-setUsername, setEmail, setPassword, setAge.
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <strong>יצירת הכלל הראשון</strong>
+          <code>UserValidation.emailLengthBiggerThan10()</code>
+          מחזיר lambda: <code>user → user.getEmail().length() > 10 ? new Valid() : new Invalid(...)</code>
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <strong>יצירת הכלל השני</strong>
+          <code>UserValidation.emailEndsWithIL()</code>
+          מחזיר lambda: <code>user → user.getEmail().endsWith("il") ? new Valid() : new Invalid(...)</code>
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <strong>שילוב עם <code>and</code></strong>
+          <code>validation1.and(validation2)</code> מחזיר <em>כלל חדש</em> שמפעיל את הראשון ואם עבר — גם את השני.
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <strong>הפעלה על המשתמש</strong>
+          <code>.apply(user)</code> — האימייל <code>"admin@#yzw.co.il"</code> ארוך 17 תווים (>10 ✓) ומסתיים ב-<code>il</code> ✓ → מחזיר <code>new Valid()</code>
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <strong>בדיקת התוצאה</strong>
+          <code>result.isValid()</code> מחזיר <code>true</code> → מודפס <code>"User is valid"</code>
+        </div>
+      </div>
+    </div>
+
+    <h3>דיאגרמת הקשרים</h3>
+    <div class="diagram">
+<pre>
+┌─────────────────────────────────────────────────────────────────┐
+│                    UserValidationV2Demo                          │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │ uses
+          ┌────────────────┼────────────────────┐
+          ▼                ▼                    ▼
+       User        UserValidation         ValidationResult
+       (data)      (combinator)           (interface)
+          │         │   and/or/xor         /          \
+          │         │   all/none        Valid        Invalid
+          │         │   8 static         (+reason)
+          │         └──── apply(user) ───────▶ returns one of ↑
+          │
+     UserFactory ──────────────────────────────▶ BasicUser
+     (Factory Method)                            PremiumUser
+                                                 PlatinumUser
+     UserUtils.sort(array, Comparator)
+     (Template Method — hook = Comparator)
+</pre>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════ 9 ═══════════════════════════ -->
+  <section id="s9">
+    <h2 class="section-title"><span class="section-num">9</span>תוצאות הבדיקות</h2>
+
+    <p>
+      הרצנו <strong>90 בדיקות אוטומטיות</strong> שמכסות כל דרישה במטלה. כולן עברו.
+    </p>
+
+    <div class="test-grid">
+      <div class="test-card">
+        <div class="label">User — fields, constructor, setters</div>
+        <div class="score">9 / 9</div>
+        <div class="desc">כולל שימוש ב-setters בקונסטרקטור</div>
+      </div>
+      <div class="test-card">
+        <div class="label">תת-מחלקות User</div>
+        <div class="score">7 / 7</div>
+        <div class="desc">ירושה + instanceof</div>
+      </div>
+      <div class="test-card">
+        <div class="label">UserFactory — Factory Method</div>
+        <div class="score">8 / 8</div>
+        <div class="desc">כולל case insensitive + שגיאה על סוג לא מוכר</div>
+      </div>
+      <div class="test-card">
+        <div class="label">UserUtils.sort — Template Method</div>
+        <div class="score">9 / 9</div>
+        <div class="desc">לפי גיל, שם, יורד, ריק, אחד</div>
+      </div>
+      <div class="test-card">
+        <div class="label">ValidationResult / Valid / Invalid</div>
+        <div class="score">10 / 10</div>
+        <div class="desc">כולל Optional, setter, instanceof</div>
+      </div>
+      <div class="test-card">
+        <div class="label">8 כללי ולידציה מובנים</div>
+        <div class="score">18 / 18</div>
+        <div class="desc">כולל מקרי גבול (גיל בדיוק 18)</div>
+      </div>
+      <div class="test-card">
+        <div class="label">and / or / xor</div>
+        <div class="score">10 / 10</div>
+        <div class="desc">כולל short-circuit</div>
+      </div>
+      <div class="test-card">
+        <div class="label">all / none (varargs)</div>
+        <div class="score">8 / 8</div>
+        <div class="desc">כולל 0 כללים, כלל אחד</div>
+      </div>
+      <div class="test-card">
+        <div class="label">שרשור מורכב</div>
+        <div class="score">4 / 4</div>
+        <div class="desc">all(...).and(...) + ענפים מרובים</div>
+      </div>
+      <div class="test-card">
+        <div class="label">Function&lt;User,ValidationResult&gt;</div>
+        <div class="score">3 / 3</div>
+        <div class="desc">lambda + עבודה דרך Function reference</div>
+      </div>
+      <div class="test-card">
+        <div class="label">קוד הבדיקה המדויק מהמטלה</div>
+        <div class="score">4 / 4</div>
+        <div class="desc">"User is valid" — תוצאה מאומתת</div>
+      </div>
+    </div>
+
+    <div class="card card-green" style="margin-top:24px; text-align:center; padding:32px;">
+      <div style="font-size: 48px; font-weight: 800; color: var(--green)">90 / 90</div>
+      <div style="color: var(--muted); margin-top: 8px; font-size: 18px">כל הבדיקות עברו</div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════ 10 ═══════════════════════════ -->
+  <section id="s10">
+    <h2 class="section-title"><span class="section-num">10</span>נקודות הניכוי שהימנענו מהן</h2>
+
+    <table class="reject-table">
+      <tr>
+        <th>קוד הניכוי</th>
+        <th>ניכוי</th>
+        <th>מה בדיוק נדרש</th>
+        <th>מה עשינו</th>
+      </tr>
+      <tr>
+        <td><code>COMBINATOR</code></td>
+        <td class="score">-40</td>
+        <td>Combinator Pattern מיושם</td>
+        <td class="pass">✅ UserValidation עם and/or/xor/all/none</td>
+      </tr>
+      <tr>
+        <td><code>FACTORY</code></td>
+        <td class="score">-10</td>
+        <td>Factory Method מיושם</td>
+        <td class="pass">✅ UserFactory.create(type, ...)</td>
+      </tr>
+      <tr>
+        <td><code>TEMPLATE</code></td>
+        <td class="score">-10</td>
+        <td>Template Method מיושם</td>
+        <td class="pass">✅ UserUtils.sort(array, Comparator)</td>
+      </tr>
+      <tr>
+        <td><code>INTERFACE</code></td>
+        <td class="score">-5</td>
+        <td>טיפוס המשתנה = ממשק, לא מחלקה קונקרטית</td>
+        <td class="pass">✅ ValidationResult result = new Valid()</td>
+      </tr>
+      <tr>
+        <td><code>CONSTRUCTOR</code></td>
+        <td class="score">-3</td>
+        <td>קונסטרקטור דרך setters</td>
+        <td class="pass">✅ setUsername(), setEmail(), setPassword(), setAge()</td>
+      </tr>
+      <tr>
+        <td><code>API</code></td>
+        <td class="score">-3</td>
+        <td>Javadoc /** */ על כל class/interface/method/field</td>
+        <td class="pass">✅ Javadoc מלא בכל הקבצים</td>
+      </tr>
+      <tr>
+        <td><code>COMMENTS</code></td>
+        <td class="score">-3</td>
+        <td>הערות // בקוד</td>
+        <td class="pass">✅ הערות בכל הקבצים</td>
+      </tr>
+      <tr>
+        <td><code>PACKAGENAME</code></td>
+        <td class="score">-3</td>
+        <td>חבילה il.ac.hit.validation</td>
+        <td class="pass">✅ בכל הקבצים</td>
+      </tr>
+      <tr>
+        <td><code>CLASSNAME</code></td>
+        <td class="score">-3</td>
+        <td>שמות מחלקות מתחילות באות גדולה</td>
+        <td class="pass">✅ User, Valid, Invalid וכו'</td>
+      </tr>
+      <tr>
+        <td><code>VIDEO</code></td>
+        <td class="score">-3</td>
+        <td>וידאו unlisted ב-YouTube עם הסבר קולי</td>
+        <td style="color:var(--accent3)">⏳ נדרש הקלטה ידנית</td>
+      </tr>
+      <tr>
+        <td><code>CLICKABLE</code></td>
+        <td class="score">-3</td>
+        <td>קישור לחיץ לוידאו ב-PDF</td>
+        <td style="color:var(--accent3)">⏳ ייכלל לאחר הכנת הוידאו</td>
+      </tr>
+      <tr>
+        <td><code>BROKENLINES</code></td>
+        <td class="score">-3</td>
+        <td>ללא שורות שבורות ב-PDF</td>
+        <td style="color:var(--accent3)">⏳ בעת הכנת ה-PDF</td>
+      </tr>
+    </table>
+
+    <div class="callout warn">
+      <div class="icon">⚠️</div>
+      <div>
+        <strong>מה נשאר לעשות?</strong><br/>
+        1. <strong>וידאו</strong> — ~60 שניות, unlisted ב-YouTube, הסבר בקול על ה-Combinator<br/>
+        2. <strong>ZIP</strong> — IntelliJ → File → Export → Project to Zip File<br/>
+        3. <strong>PDF</strong> — כל קבצי הקוד ב-PDF אחד, יישור שמאל, ללא שבירת שורות,
+           פרטי צוות + קישור לוידאו בתחילת הקובץ<br/>
+        4. <strong>הגשה</strong> — ZIP + JAR + PDF → Moodle (רק מנהל הצוות)
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <p>ספריית Validation — פרויקט גמר בקורס תבניות עיצוב תוכנה קלאסיות</p>
+  <p style="margin-top:8px; font-size:12px;">Java 24 &nbsp;|&nbsp; Package: il.ac.hit.validation &nbsp;|&nbsp; validation.jar</p>
+</footer>
+
+</body>
+</html>
